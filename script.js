@@ -1,73 +1,39 @@
-const botaoMenu = document.querySelector(".btn-menu");
-const menuEscondido = document.querySelector(".menu-lateral");
-let PaginaInicial = alert("você acabou de abrir a página");
-botaoMenu.addEventListener("click",function(){
-    menuEscondido.classList.toggle("ativo");
-    botaoMenu.classList.toggle("girar");
-})
+const botaoAlternarMenu = document.querySelector(".btn-menu");
+const painelMenuLateral = document.querySelector(".menu-lateral");
 
-//AGARRANDO O BOTÃO DE CHAVEAMENTO
-/*
-const btnBrasil = document.querySelector('#time1');
-const btnChile = document.querySelector('#time2');
-const vagaSemi1 = document.querySelector('#vencedor-q1');
+botaoAlternarMenu.addEventListener("click", () => {
+    painelMenuLateral.classList.toggle("ativo");
+    botaoAlternarMenu.classList.toggle("girar");
+});
 
-btnBrasil.addEventListener("click", function(){
-if(vagaSemi1.innerText === "?"){
-    vagaSemi1.innerText = btnBrasil.innerText;btnBrasil.classList.add("brilho-vencedor")
-}
-else{
-    console.log("Atenção: Este jogo já foi decidido")
-}
+async function inicializarTorneio() {
+    const elementoMensagem = document.getElementById("mensagem-estado");
+    const tabuleiroPrincipal = document.getElementById("tabuleiro-copa");
+    const espacoPrimeiraSemi = document.getElementById("vencedor-q1");
 
-})
-*/
-async function carregarTimes(){
-    try{
+    try {
+        
+        const timesRecebidos = [
+            { "nome": "Brasil", "destino": "vencedor-q1" },
+            { "nome": "Chile", "destino": "vencedor-q1" },
+            { "nome": "Holanda", "destino": "vencedor-q2" },
+            { "nome": "México", "destino": "vencedor-q2" }
+        ];
+        elementoMensagem.style.display = "none";
+        tabuleiroPrincipal.style.display = "grid";
 
-    let response = await fetch("https://api.npoint.io/b4d8b10ce6ea2dc54791")
- let timesDaApi = await response.json();
- console.log("Dados recebidos:",timesDaApi);
- const tabuleiro = document.getElementById("tabuleiro-copa");
- const primeiraSemi = document.getElementById("vencedor-q1");
- timesDaApi.forEach(function(time){
-    let novoBotao = document.createElement("button");
-    novoBotao.innerText = time.nome;
-    novoBotao.dataset.destino = time.destino;
-    novoBotao.classList.add("jogo", "quartas");
-    tabuleiro.insertBefore(novoBotao,primeiraSemi)
- });
- console.log("Botões Criados na Tela!");
- ativarMaquinaCliques()
-    }
-    catch(erro){
-        console.log("Erro ao buscar os times:", erro);
-    }
-}
-function ativarMaquinaCliques(){
-    const todosOsJogos = document.querySelectorAll(".jogo");
-    todosOsJogos.forEach(function(botao){
-        botao.addEventListener("click", function(event){
-            let nomeDoTime = event.target.innerText;
-            let idDoDestino = event.target.dataset.destino;
-            if(nomedoTime === "?"|| !idDoDestino){
-                return;
-            }
-            let espacoDestino = document.getElementById(idDoDestino);
-            if(espacoDestino.innerText === "A Grande Final"){
-            if(espacoDestino.innerText === "A Grande Final"){
-                espacoDestino.innerText = nomeDoTime + "CAMPEÃO! 🏆";
-            } else{
-                espacoDestino.innerText = nomeDoTime;
-            }
-            event.target.classList.add("brilho-vencedor");
-        } else{
-            console.log( "O Juiz já apitou o fim deste confronto!")
+        timesRecebidos.forEach(time => {
+            let botaoCriado = document.createElement("button");
+            botaoCriado.innerText = time.nome;
+            botaoCriado.dataset.destino = time.destino;
+            botaoCriado.classList.add("jogo", "quartas");
             
-        }
+            tabuleiroPrincipal.insertBefore(botaoCriado, espacoPrimeiraSemi);
+        });
 
-      });
-  });
-}
-carregarTimes()
+        ativarRegrasDoCampeonato();
 
+    } catch (erro) {
+        console.error("Falha na comunicação com o servidor:", erro);
+        elementoMensagem.innerText = "Lamentamos, ocorreu um erro ao carregar os dados do torneio. Tente recarregar a página.";
+        elementoMensagem.classList.add("estado-erro");
